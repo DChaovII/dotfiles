@@ -1,0 +1,10 @@
+export GTK_IM_MODULE=kime
+export QT_IM_MODULE=kime
+export XMODIFIERS=@im=kime
+autorandr -c &
+kime-xim &
+lxsession &
+picom &
+blueman-applet &
+nm-applet &
+dunst &
