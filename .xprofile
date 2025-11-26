@@ -1,10 +1,13 @@
 export GTK_IM_MODULE=kime
 export QT_IM_MODULE=kime
 export XMODIFIERS=@im=kime
+export QT_QPA_PLATFORMTHEME=gtk3
+# export QT_STYLE_OVERRIDE=kvantum
 autorandr -c &
-kime-xim &
+kime &
 lxsession &
 picom &
 blueman-applet &
 nm-applet &
 dunst &
+kakaotalk &
