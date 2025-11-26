@@ -49,7 +49,7 @@ mod = "mod1" # mod4 == Super_L, mod1 == Alt_L
 #    mod = 'mod4'
 #myTerminal = guess_terminal()
 myTerminal = 'alacritty'
-myBrowser = 'brave'
+myBrowser = 'qutebrowser' # 'brave'
 myFm = 'pcmanfm'
 colours = colours.nord
 
@@ -105,8 +105,8 @@ keys = [
     Key([], "XF86AudioMute", lazy.spawn("pamixer -t"), desc="Toggle mute volume"),
     Key([], "XF86MonBrightnessUp", lazy.spawn("brillo -A 5"), desc="Increase brightness by 5%"),
     Key([], "XF86MonBrightnessDown", lazy.spawn("brillo -U 5"), desc="Decrease brightness by 5%"),
-Key([mod, "shift"], "o", lazy.spawn(os.path.expanduser("~/.config/qtile/screenshotScripts/maimSelect.sh")), desc="Screenshot selected region with flameshot"), # mod-shift-o == PrtSc without Fn
-    Key([], "Print", lazy.spawn(os.path.expanduser("~/.config/qtile/screenshotScripts/maimFull.sh")), desc="Screenshot selected screen with flameshot"), # Fn+PrtSc == PrtSc
+Key([mod, "shift"], "o", lazy.spawn(os.path.expanduser("~/.config/qtile/screenshotScripts/maimSelect.sh")), desc="Screenshot selected region with maim"), # mod-shift-o == PrtSc without Fn
+    Key([], "Print", lazy.spawn(os.path.expanduser("~/.config/qtile/screenshotScripts/maimFull.sh")), desc="Screenshot selected screen with maim"), # Fn+PrtSc == PrtSc
 ]
 
 # Add key bindings to switch VTs in Wayland.
@@ -124,9 +124,8 @@ for vt in range(1, 8):
 
 group_len = 7
 group_names = [str(i+1) for i in range(group_len)]
-group_labels = ['DEV','WEB','DOC', 'MUS', 'VID', 'BOOK', 'MISC']
-groups = [Group(name=group_names[i], label=group_labels[i]) for i in range(group_len)]
-
+group_labels = ['DEV', 'WEB', 'SYS', 'DOC', 'MUS', 'BOOK', 'MISC']
+groups = [Group(name=group_names[i], label=group_labels[i]) for i in range(group_len-1)]+[Group(name=group_names[-1], label=group_labels[-1], matches=[Match(title='카카오톡')])]
 for i in groups:
     keys.extend(
         [
@@ -166,9 +165,9 @@ layouts = [
     # layout.Bsp(),
     # layout.Matrix(),
     layout.MonadTall(**layout_theme),
-    # layout.MonadWide(**layout_theme),
+    layout.MonadWide(**layout_theme),
     # layout.RatioTile(),
-    layout.Tile(**layout_theme),
+    # layout.Tile(**layout_theme),
     # layout.TreeTab(),
     # layout.VerticalTile(),
     # layout.Zoomy(),
@@ -201,6 +200,7 @@ bar0 = bar.Bar(
                     this_screen_border = colours[3][3],
                     other_current_screen_border = colours[2][1],
                     other_screen_border = colours[3][3],
+                    urgent_border = colours[3][0],
                     ),
                 widget.TextBox("|"),
                 widget.CurrentLayout(),
@@ -267,6 +267,7 @@ bar1 = bar.Bar(
                     this_screen_border = colours[3][3],
                     other_current_screen_border = colours[2][1],
                     other_screen_border = colours[3][3],
+                    urgent_border = colours[3][0],
                     ),
                 widget.TextBox("|"),
                 widget.CurrentLayout(),
@@ -361,6 +362,8 @@ floating_layout = layout.Floating(
         Match(wm_class="maketag"),  # gitk
         Match(wm_class="ssh-askpass"),  # ssh-askpass
         Match(wm_class='blueman-manager'),
+        Match(wm_class='qalculate-gtk'),
+        Match(wm_class='kakaotalk.exe'),
         Match(title="branchdialog"),  # gitk
         Match(title="pinentry"),  # GPG key password entry
     ]
