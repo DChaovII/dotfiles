@@ -49,7 +49,7 @@ mod = "mod1" # mod4 == Super_L, mod1 == Alt_L
 #    mod = 'mod4'
 #myTerminal = guess_terminal()
 myTerminal = 'alacritty'
-myBrowser = 'qutebrowser' # 'brave'
+myBrowser = 'brave'
 myFm = 'pcmanfm'
 colours = colours.nord
 
