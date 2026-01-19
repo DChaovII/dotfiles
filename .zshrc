@@ -100,8 +100,8 @@ plugins=(zsh-syntax-highlighting)
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
-alias clear="clear && pfetch"
-alias vim='nvim'
+#alias clear="clear && pfetch"
+#alias vim='nvim'
 
 ZSH_CACHE_DIR=$HOME/.cache/oh-my-zsh
 if [[ ! -d $ZSH_CACHE_DIR ]]; then
@@ -109,5 +109,5 @@ if [[ ! -d $ZSH_CACHE_DIR ]]; then
 fi
 
 source $ZSH/oh-my-zsh.sh
-export LS_COLORS="$LS_COLORS:ow=1;34:"
-pfetch
+#export LS_COLORS="$LS_COLORS:ow=1;34:"
+#pfetch

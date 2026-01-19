@@ -26,31 +26,24 @@
 
 import os
 
-#import subprocess
-#import re
+import subprocess
 import libqtile.resources
-from libqtile import bar, layout, qtile, widget
+from libqtile import bar, layout, qtile, widget, hook
 from libqtile.config import Click, Drag, Group, Key, Match, Screen
 from libqtile.lazy import lazy
 # from libqtile.utils import guess_terminal
 import colours
 
-# Check if external keyboard named 'COX' connected
-#def isExtrnKeyboard():
-#    lsusb = subprocess.check_output(['lsusb']).decode('UTF-8')
-#    if re.search('COX', lsusb, re.IGNORECASE):
-#        return True
-#    return False
+@hook.subscribe.startup_once
+def autostart():
+    home = os.path.expanduser('~/.config/qtile/autostart.sh')
+    subprocess.call(home)
 
 mod = "mod1" # mod4 == Super_L, mod1 == Alt_L
-#if isExtrnKeyboard():
-#    mod = 'mod1'
-#else:
-#    mod = 'mod4'
 #myTerminal = guess_terminal()
 myTerminal = 'alacritty'
 myBrowser = 'brave'
-myFm = 'pcmanfm'
+myFm = 'pcmanfm-qt'
 colours = colours.nord
 
 keys = [
