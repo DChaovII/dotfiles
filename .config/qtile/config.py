@@ -25,25 +25,37 @@
 # SOFTWARE.
 
 import os
-
 import subprocess
+from math import ceil
 import libqtile.resources
-from libqtile import bar, layout, qtile, widget, hook
+
+from qtile_extras import widget as extra_widget
+
+from libqtile import bar, layout, qtile, hook, widget
 from libqtile.config import Click, Drag, Group, Key, Match, Screen
 from libqtile.lazy import lazy
+from libqtile.backend.wayland import InputConfig
 # from libqtile.utils import guess_terminal
 import colours
+
 
 @hook.subscribe.startup_once
 def autostart():
     home = os.path.expanduser('~/.config/qtile/autostart.sh')
     subprocess.call(home)
 
+@hook.subscribe.client_new
+def bring_to_front(client):
+    if client.floating:
+        client.bring_to_front()
+        client.focus()
+
 mod = "mod1" # mod4 == Super_L, mod1 == Alt_L
 #myTerminal = guess_terminal()
 myTerminal = 'alacritty'
 myBrowser = 'brave'
 myFm = 'pcmanfm-qt'
+myWall = '~/.config/qtile/wallpaper/wallpaper.jpg'
 colours = colours.nord
 
 keys = [
@@ -115,10 +127,11 @@ for vt in range(1, 8):
         )
     )
 
-group_len = 7
-group_names = [str(i+1) for i in range(group_len)]
-group_labels = ['DEV', 'WEB', 'SYS', 'DOC', 'MUS', 'BOOK', 'MISC']
-groups = [Group(name=group_names[i], label=group_labels[i]) for i in range(group_len-1)]+[Group(name=group_names[-1], label=group_labels[-1], matches=[Match(title='카카오톡')])]
+#group_len = 7
+#group_names = [str(i+1) for i in range(group_len)]
+#group_labels = ['DEV', 'WEB', 'SYS', 'DOC', 'MUS', 'BOOK', 'MISC']
+#groups = [Group(name=group_names[i], label=group_labels[i]) for i in range(group_len-1)]+[Group(name=group_names[-1], label=group_labels[-1], matches=[Match(title='카카오톡')])]
+groups = [Group(name=i, label=f' {i} ') for i in '12345']
 for i in groups:
     keys.extend(
         [
@@ -145,7 +158,7 @@ for i in groups:
 
 layout_theme = {
         "border_width": 2,
-        "margin": 12,
+        "margin": 8,
         'border_focus':colours[2][1],
         'border_normal':colours[0][0]
         }
@@ -167,14 +180,21 @@ layouts = [
 ]
 
 myPad=8
+default_fontsize=15
+default_padding=3
 widget_defaults = dict(
-    font="Mononoki Nerd Font Bold",
-    fontsize=15,
-    padding=3,
-    background=colours[0][0],
-    foreground=colours[1][2],
+        font="Mononoki Nerd Font Bold",
+        fontsize=default_fontsize,
+        padding=default_padding,
+        background=colours[0][0],
+        foreground=colours[1][2],
 )
 extension_defaults = widget_defaults.copy()
+
+# 120% scaling
+fontsize_120=default_fontsize #ceil(default_fontsize*1.2)
+padding_120=default_padding #ceil(default_padding*1.2)
+myPad_120=myPad #ceil(myPad*1.2)
 
 bar0 = bar.Bar(
             [
@@ -185,6 +205,8 @@ bar0 = bar.Bar(
                 #    fontsize=18,
                 #    ),
                 widget.GroupBox(
+                    fontsize=fontsize_120,
+                    padding=padding_120,
                     highlight_method = 'line',
                     highlight_color = [colours[0][1], colours[0][1]],
                     active = colours[1][2],
@@ -195,19 +217,35 @@ bar0 = bar.Bar(
                     other_screen_border = colours[3][3],
                     urgent_border = colours[3][0],
                     ),
-                widget.TextBox("|"),
-                widget.CurrentLayout(),
-                widget.TextBox("|"),
-                widget.WindowName(),
+                widget.TextBox(
+                    "| bar0 |",
+                    fontsize=fontsize_120,
+                    padding=padding_120,
+                    ),
+                widget.CurrentLayout(
+                    fontsize=fontsize_120,
+                    padding=padding_120,
+                    ),
+                widget.TextBox(
+                    "|",
+                    fontsize=fontsize_120,
+                    padding=padding_120,
+                    ),
+                widget.WindowName(
+                    fontsize=fontsize_120,
+                    padding=padding_120,
+                    ),
                 # NB Systray is incompatible with Wayland, consider using StatusNotifier instead
                 # widget.StatusNotifier(),
                 widget.CPU(
                     format='CPU {load_percent}%',
-                    padding=myPad,
+                    padding=myPad_120,
+                    fontsize=fontsize_120,
                     ),
                 widget.Memory(
                     format='MEM {MemPercent}%',
-                    padding=myPad,
+                    padding=myPad_120,
+                    fontsize=fontsize_120,
                     ),
                 widget.Volume(
                     #emoji=True,
@@ -216,14 +254,16 @@ bar0 = bar.Bar(
                     unmute_format='󰕾 {volume}%',
                     check_mute_command='pamixer --get-mute',
                     get_volume_command='pamixer --get-volume-human',
-                    padding=myPad,
+                    padding=myPad_120,
+                    fontsize=fontsize_120,
                     ),
                 widget.Backlight(
                     backlight_name='amdgpu_bl1',
                     fmt='󰃟 {}',
-                    padding=myPad,
+                    padding=myPad_120,
+                    fontsize=fontsize_120,
                     ),
-                widget.Spacer(length=5),
+                widget.Spacer(length=5), #6
                 widget.Battery(
                     format='{char} {percent:0.0%}',
                     charge_controller=lambda: (0,90),
@@ -232,13 +272,16 @@ bar0 = bar.Bar(
                     discharge_char='󰁿',
                     charge_char='󰂉',
                     not_charging_char='󱞜',
+                    padding=padding_120,
+                    fontsize=fontsize_120,
                     #padding=myPad,
                     ),
                 widget.Systray(padding=myPad),
-                widget.Clock(format="%a %d %b %H:%M", padding=myPad),
-                widget.Spacer(length=8),
+                #extra_widget.StatusNotifier(padding=myPad_120),
+                widget.Clock(format="%a %d %b %H:%M", padding=myPad_120, fontsize=fontsize_120),
+                widget.Spacer(length=8), #10
             ],
-            size = 30,
+            size = 28, #34
             # border_width=[2, 0, 2, 0],  # Draw top and bottom borders
             # border_color=["ff00ff", "000000", "ff00ff", "000000"]  # Borders are magenta
         )
@@ -262,7 +305,7 @@ bar1 = bar.Bar(
                     other_screen_border = colours[3][3],
                     urgent_border = colours[3][0],
                     ),
-                widget.TextBox("|"),
+                widget.TextBox("| bar1 |"),
                 widget.CurrentLayout(),
                 widget.TextBox("|"),
                 widget.WindowName(),
@@ -301,12 +344,13 @@ bar1 = bar.Bar(
                     not_charging_char='󱞜',
                     #padding=myPad,
                     ),
-                # widget.Systray(padding=myPad),
+                #widget.Systray(padding=myPad),
+                #extra_widget.StatusNotifier(padding=myPad),
                 widget.Spacer(length=5),
                 widget.Clock(format="%a %d %b %H:%M", padding=myPad),
                 widget.Spacer(length=8),
             ],
-            size = 30,
+            size = 28,
             # border_width=[2, 0, 2, 0],  # Draw top and bottom borders
             # border_color=["ff00ff", "000000", "ff00ff", "000000"]  # Borders are magenta
         )
@@ -315,7 +359,7 @@ screens = [
     Screen(
         top=bar0,
         background="#000000",
-        wallpaper='/usr/share/backgrounds/archlinux/lone.jpg',
+        wallpaper=myWall,
         wallpaper_mode="fill",
         # You can uncomment this variable if you see that on X11 floating resize/moving is laggy
         # By default we handle these events delayed to already improve performance, however your system might still be struggling
@@ -325,7 +369,7 @@ screens = [
     Screen(
         top=bar1,
         background="#000000",
-        wallpaper='/usr/share/backgrounds/archlinux/lone.jpg',
+        wallpaper=myWall,
         wallpaper_mode="fill",
     )
 ]
@@ -359,7 +403,7 @@ floating_layout = layout.Floating(
         Match(wm_class='kakaotalk.exe'),
         Match(title="branchdialog"),  # gitk
         Match(title="pinentry"),  # GPG key password entry
-    ]
+    ],
 )
 auto_fullscreen = True
 focus_on_window_activation = "smart"
@@ -371,7 +415,9 @@ reconfigure_screens = True
 auto_minimize = True
 
 # When using the Wayland backend, this can be used to configure input devices.
-wl_input_rules = None
+wl_input_rules = {
+        "type:keyboard": InputConfig(kb_layout='us', kb_variant='dvorak'),
+}
 
 # xcursor theme (string or None) and size (integer) for Wayland backend
 wl_xcursor_theme = None
