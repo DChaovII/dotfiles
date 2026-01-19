@@ -306,7 +306,7 @@ bar0 = bar.Bar(
                 widget.Volume(
                     #emoji=True,
                     #emoji_list=['󰝟','󰕿','󰖀','󰕾'],
-                    mute_format='󰝟 Muted',
+                    mute_format='󰝟 MM',
                     unmute_format='󰕾 {volume}%',
                     check_mute_command='pamixer --get-mute',
                     get_volume_command='pamixer --get-volume-human',
@@ -394,7 +394,7 @@ bar1 = bar.Bar(
                 widget.Volume(
                     #emoji=True,
                     #emoji_list=['󰝟','󰕿','󰖀','󰕾'],
-                    mute_format='󰝟 Muted',
+                    mute_format='󰝟 MM',
                     unmute_format='󰕾 {volume}%',
                     check_mute_command='pamixer --get-mute',
                     get_volume_command='pamixer --get-volume-human',
