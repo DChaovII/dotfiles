@@ -39,16 +39,31 @@ from libqtile.backend.wayland import InputConfig
 import colours
 
 
-@hook.subscribe.startup_once
-def autostart():
-    home = os.path.expanduser('~/.config/qtile/autostart.sh')
-    subprocess.call(home)
+#@hook.subscribe.startup_once
+#def autostart():
+#    home = os.path.expanduser('~/.config/qtile/autostart.sh')
+#    subprocess.call(home)
+
+#@hook.subscribe.client_new
+#def bring_to_front(client):
+#    if client.floating:
+#        client.bring_to_front()
+#        client.focus()
 
 @hook.subscribe.client_new
-def bring_to_front(client):
-    if client.floating:
-        client.bring_to_front()
-        client.focus()
+def handle_kakaotalk(client):
+    wm_class = client.get_wm_class()
+    if wm_class and 'kakaotalk.exe' in wm_class:
+        if client.name != "카카오톡":
+            client.can_steal_focus = False
+            client.togroup(qtile.current_group.name)
+
+def is_hdmi_connected():
+    try:
+        output = subprocess.check_output("xrandr").decode("utf-8")
+        return "HDMI-1 connected" in output
+    except Exception:
+        return False
 
 mod = "mod1" # mod4 == Super_L, mod1 == Alt_L
 #myTerminal = guess_terminal()
@@ -131,7 +146,15 @@ for vt in range(1, 8):
 #group_names = [str(i+1) for i in range(group_len)]
 #group_labels = ['DEV', 'WEB', 'SYS', 'DOC', 'MUS', 'BOOK', 'MISC']
 #groups = [Group(name=group_names[i], label=group_labels[i]) for i in range(group_len-1)]+[Group(name=group_names[-1], label=group_labels[-1], matches=[Match(title='카카오톡')])]
-groups = [Group(name=i, label=f' {i} ') for i in '12345']
+groups = [Group(name=i, label=f' {i} ') for i in '1234']
+groups.append(
+        Group(
+            name = "5",
+            label = ' 5 ',
+            matches=[Match(title='카카오톡', wm_class='kakaotalk.exe')]
+            )
+        )
+
 for i in groups:
     keys.extend(
         [
@@ -179,9 +202,11 @@ layouts = [
     # layout.Zoomy(),
 ]
 
-myPad=8
+default_myPad=8
 default_fontsize=15
 default_padding=3
+default_spacer=5
+default_barsize=28
 widget_defaults = dict(
         font="Mononoki Nerd Font Bold",
         fontsize=default_fontsize,
@@ -191,10 +216,41 @@ widget_defaults = dict(
 )
 extension_defaults = widget_defaults.copy()
 
-# 120% scaling
-fontsize_120=default_fontsize #ceil(default_fontsize*1.2)
-padding_120=default_padding #ceil(default_padding*1.2)
-myPad_120=myPad #ceil(myPad*1.2)
+# scaling
+scale = 1.2
+myPad_scaled=ceil(default_myPad*scale)
+fontsize_scaled=ceil(default_fontsize*scale)
+padding_scaled=ceil(default_padding*scale)
+spacer_scaled=ceil(default_spacer*scale)
+barsize_scaled=ceil(default_barsize*scale)
+
+# apply proper scaling
+if is_hdmi_connected():
+    #bar0
+    myPad0=default_myPad
+    fontsize0=default_fontsize
+    padding0=default_padding
+    spacer0=default_spacer
+    barsize0=default_barsize
+    #bar1
+    myPad1=myPad_scaled
+    fontsize1=fontsize_scaled
+    padding1=padding_scaled
+    spacer1=spacer_scaled
+    barsize1=barsize_scaled
+else:
+    #bar0
+    myPad0=myPad_scaled
+    fontsize0=fontsize_scaled
+    padding0=padding_scaled
+    spacer0=spacer_scaled
+    barsize0=barsize_scaled
+    #bar1
+    myPad1=default_myPad
+    fontsize1=default_fontsize
+    padding1=default_padding
+    spacer1=default_spacer
+    barsize1=default_barsize
 
 bar0 = bar.Bar(
             [
@@ -205,8 +261,8 @@ bar0 = bar.Bar(
                 #    fontsize=18,
                 #    ),
                 widget.GroupBox(
-                    fontsize=fontsize_120,
-                    padding=padding_120,
+                    fontsize=fontsize0,
+                    padding=padding0,
                     highlight_method = 'line',
                     highlight_color = [colours[0][1], colours[0][1]],
                     active = colours[1][2],
@@ -218,35 +274,35 @@ bar0 = bar.Bar(
                     urgent_border = colours[3][0],
                     ),
                 widget.TextBox(
-                    "| bar0 |",
-                    fontsize=fontsize_120,
-                    padding=padding_120,
+                    "|",
+                    fontsize=fontsize0,
+                    padding=padding0,
                     ),
                 widget.CurrentLayout(
-                    fontsize=fontsize_120,
-                    padding=padding_120,
+                    fontsize=fontsize0,
+                    padding=padding0,
                     ),
                 widget.TextBox(
                     "|",
-                    fontsize=fontsize_120,
-                    padding=padding_120,
+                    fontsize=fontsize0,
+                    padding=padding0,
                     ),
                 widget.WindowName(
-                    fontsize=fontsize_120,
-                    padding=padding_120,
+                    fontsize=fontsize0,
+                    padding=padding0,
                     ),
                 # NB Systray is incompatible with Wayland, consider using StatusNotifier instead
                 # widget.StatusNotifier(),
-                widget.CPU(
-                    format='CPU {load_percent}%',
-                    padding=myPad_120,
-                    fontsize=fontsize_120,
-                    ),
-                widget.Memory(
-                    format='MEM {MemPercent}%',
-                    padding=myPad_120,
-                    fontsize=fontsize_120,
-                    ),
+                #widget.CPU(
+                #    format='CPU {load_percent}%',
+                #    padding=myPad_120,
+                #    fontsize=fontsize_120,
+                #    ),
+                #widget.Memory(
+                #    format='MEM {MemPercent}%',
+                #    padding=myPad_120,
+                #    fontsize=fontsize_120,
+                #    ),
                 widget.Volume(
                     #emoji=True,
                     #emoji_list=['󰝟','󰕿','󰖀','󰕾'],
@@ -254,16 +310,16 @@ bar0 = bar.Bar(
                     unmute_format='󰕾 {volume}%',
                     check_mute_command='pamixer --get-mute',
                     get_volume_command='pamixer --get-volume-human',
-                    padding=myPad_120,
-                    fontsize=fontsize_120,
+                    padding=myPad0,
+                    fontsize=fontsize0,
                     ),
                 widget.Backlight(
                     backlight_name='amdgpu_bl1',
                     fmt='󰃟 {}',
-                    padding=myPad_120,
-                    fontsize=fontsize_120,
+                    padding=myPad0,
+                    fontsize=fontsize0,
                     ),
-                widget.Spacer(length=5), #6
+                widget.Spacer(length=spacer0), #6
                 widget.Battery(
                     format='{char} {percent:0.0%}',
                     charge_controller=lambda: (0,90),
@@ -272,16 +328,16 @@ bar0 = bar.Bar(
                     discharge_char='󰁿',
                     charge_char='󰂉',
                     not_charging_char='󱞜',
-                    padding=padding_120,
-                    fontsize=fontsize_120,
-                    #padding=myPad,
+                    padding=padding0,
+                    fontsize=fontsize0,
+                    #padding=myPad_120,
                     ),
-                widget.Systray(padding=myPad),
+                widget.Systray(padding=myPad0),
                 #extra_widget.StatusNotifier(padding=myPad_120),
-                widget.Clock(format="%a %d %b %H:%M", padding=myPad_120, fontsize=fontsize_120),
-                widget.Spacer(length=8), #10
+                widget.Clock(format="%a %d %b %H:%M", padding=myPad0, fontsize=fontsize0),
+                widget.Spacer(length=spacer0), #10
             ],
-            size = 28, #34
+            size = barsize0, #34
             # border_width=[2, 0, 2, 0],  # Draw top and bottom borders
             # border_color=["ff00ff", "000000", "ff00ff", "000000"]  # Borders are magenta
         )
@@ -295,6 +351,8 @@ bar1 = bar.Bar(
                 #    fontsize=18,
                 #    ),
                 widget.GroupBox(
+                    fontsize=fontsize1,
+                    padding=padding1,
                     highlight_method = 'line',
                     highlight_color = [colours[0][1], colours[0][1]],
                     active = colours[1][2],
@@ -305,20 +363,34 @@ bar1 = bar.Bar(
                     other_screen_border = colours[3][3],
                     urgent_border = colours[3][0],
                     ),
-                widget.TextBox("| bar1 |"),
-                widget.CurrentLayout(),
-                widget.TextBox("|"),
-                widget.WindowName(),
+                widget.TextBox(
+                    "|",
+                    fontsize=fontsize1,
+                    padding=padding1,
+                    ),
+                widget.CurrentLayout(
+                    fontsize=fontsize1,
+                    padding=padding1,
+                    ),
+                widget.TextBox(
+                    "|",
+                    fontsize=fontsize1,
+                    padding=padding1,
+                    ),
+                widget.WindowName(
+                    fontsize=fontsize1,
+                    padding=padding1,
+                    ),
                 # NB Systray is incompatible with Wayland, consider using StatusNotifier instead
                 # widget.StatusNotifier(),
-                widget.CPU(
-                    format='CPU {load_percent}%',
-                    padding=myPad,
-                    ),
-                widget.Memory(
-                    format='MEM {MemPercent}%',
-                    padding=myPad,
-                    ),
+                #widget.CPU(
+                #    format='CPU {load_percent}%',
+                #    padding=myPad,
+                #    ),
+                #widget.Memory(
+                #    format='MEM {MemPercent}%',
+                #    padding=myPad,
+                #    ),
                 widget.Volume(
                     #emoji=True,
                     #emoji_list=['󰝟','󰕿','󰖀','󰕾'],
@@ -326,14 +398,16 @@ bar1 = bar.Bar(
                     unmute_format='󰕾 {volume}%',
                     check_mute_command='pamixer --get-mute',
                     get_volume_command='pamixer --get-volume-human',
-                    padding=myPad,
+                    padding=myPad1,
+                    fontsize=fontsize1,
                     ),
                 widget.Backlight(
                     backlight_name='amdgpu_bl1',
                     fmt='󰃟 {}',
-                    padding=myPad,
+                    padding=myPad1,
+                    fontsize=fontsize1,
                     ),
-                widget.Spacer(length=5),
+                #widget.Spacer(length=5),
                 widget.Battery(
                     format='{char} {percent:0.0%}',
                     charge_controller=lambda: (0,90),
@@ -342,15 +416,16 @@ bar1 = bar.Bar(
                     discharge_char='󰁿',
                     charge_char='󰂉',
                     not_charging_char='󱞜',
-                    #padding=myPad,
+                    padding=myPad1,
+                    fontsize=fontsize1,
                     ),
                 #widget.Systray(padding=myPad),
                 #extra_widget.StatusNotifier(padding=myPad),
-                widget.Spacer(length=5),
-                widget.Clock(format="%a %d %b %H:%M", padding=myPad),
-                widget.Spacer(length=8),
+                #widget.Spacer(length=5),
+                widget.Clock(format="%a %d %b %H:%M", padding=myPad1, fontsize=fontsize1),
+                widget.Spacer(length=spacer1),
             ],
-            size = 28,
+            size = barsize1,
             # border_width=[2, 0, 2, 0],  # Draw top and bottom borders
             # border_color=["ff00ff", "000000", "ff00ff", "000000"]  # Borders are magenta
         )
@@ -415,9 +490,9 @@ reconfigure_screens = True
 auto_minimize = True
 
 # When using the Wayland backend, this can be used to configure input devices.
-wl_input_rules = {
-        "type:keyboard": InputConfig(kb_layout='us', kb_variant='dvorak'),
-}
+#wl_input_rules = {
+#        "type:keyboard": InputConfig(kb_layout='us', kb_variant='dvorak'),
+#}
 
 # xcursor theme (string or None) and size (integer) for Wayland backend
 wl_xcursor_theme = None
