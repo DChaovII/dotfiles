@@ -71,6 +71,7 @@ myTerminal = 'alacritty'
 myBrowser = 'brave'
 myFm = 'pcmanfm-qt'
 myWall = '~/.config/qtile/wallpaper/wallpaper.jpg'
+scripts_dir = '~/.config/qtile/scripts'
 colours = colours.nord
 
 keys = [
@@ -120,13 +121,13 @@ keys = [
     Key([mod], "e", lazy.spawn(myFm), desc="Spawn my gui file manager"),
 
     Key([mod], "Escape", lazy.spawn("rofi -show p -modi p:rofi-power-menu"), desc="Spawn rofi power menu"),
-    Key([], "XF86AudioRaiseVolume", lazy.spawn("pamixer -i 2"), desc="Raise volume by 2%"),
-    Key([], "XF86AudioLowerVolume", lazy.spawn("pamixer -d 2"), desc="Lower volume by 2%"),
-    Key([], "XF86AudioMute", lazy.spawn("pamixer -t"), desc="Toggle mute volume"),
-    Key([], "XF86MonBrightnessUp", lazy.spawn("brillo -A 5"), desc="Increase brightness by 5%"),
-    Key([], "XF86MonBrightnessDown", lazy.spawn("brillo -U 5"), desc="Decrease brightness by 5%"),
-Key([mod, "shift"], "o", lazy.spawn(os.path.expanduser("~/.config/qtile/screenshotScripts/maimSelect.sh")), desc="Screenshot selected region with maim"), # mod-shift-o == PrtSc without Fn
-    Key([], "Print", lazy.spawn(os.path.expanduser("~/.config/qtile/screenshotScripts/maimFull.sh")), desc="Screenshot selected screen with maim"), # Fn+PrtSc == PrtSc
+    Key([], "XF86AudioRaiseVolume", lazy.spawn(f'{os.path.expanduser(scripts_dir + "/vol_notify.sh")} up'), desc="Raise volume by 2%"),
+    Key([], "XF86AudioLowerVolume", lazy.spawn(f"{os.path.expanduser(scripts_dir + '/vol_notify.sh')} down"), desc="Lower volume by 2%"),
+    Key([], "XF86AudioMute", lazy.spawn(f"{os.path.expanduser(scripts_dir + '/vol_notify.sh')} mute"), desc="Toggle mute volume"),
+    Key([], "XF86MonBrightnessUp", lazy.spawn("brightnessctl set +5%"), desc="Increase brightness by 5%"),
+    Key([], "XF86MonBrightnessDown", lazy.spawn("brightnessctl set 5%-"), desc="Decrease brightness by 5%"),
+Key([mod, "shift"], "o", lazy.spawn(os.path.expanduser(scripts_dir + "/maimSelect.sh")), desc="Screenshot selected region with maim"), # mod-shift-o == PrtSc without Fn
+    Key([], "Print", lazy.spawn(os.path.expanduser(scripts_dir + "/maimFull.sh")), desc="Screenshot selected screen with maim"), # Fn+PrtSc == PrtSc
 ]
 
 # Add key bindings to switch VTs in Wayland.
@@ -410,7 +411,7 @@ bar1 = bar.Bar(
                 #widget.Spacer(length=5),
                 widget.Battery(
                     format='{char} {percent:0.0%}',
-                    charge_controller=lambda: (0,90),
+                    charge_controller=lambda: (0,80),
                     empty_char='󰂎',
                     full_char='󰁹',
                     discharge_char='󰁿',
