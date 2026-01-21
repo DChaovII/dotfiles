@@ -118,6 +118,7 @@ keys = [
     Key([mod], "p", lazy.spawn('rofi -show drun -show-icons'), desc="Spawn a rofi launcher"),
 
     Key([mod, "shift"], "e", lazy.spawn(myBrowser), desc="Spawn my web browser"),
+    Key([mod, "control"], "e", lazy.spawn(myBrowser + ' --incognito'), desc="Spawn my web browser in incognito"),
     Key([mod], "e", lazy.spawn(myFm), desc="Spawn my gui file manager"),
 
     Key([mod], "Escape", lazy.spawn("rofi -show p -modi p:rofi-power-menu"), desc="Spawn rofi power menu"),
